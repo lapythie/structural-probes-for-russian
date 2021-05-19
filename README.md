@@ -4,8 +4,9 @@ Code is heavily based on John Hewitt's [structural-probes](https://github.com/jo
 
 ## Steps
 
-0. [Install](https://bert-as-service.readthedocs.io/en/latest/section/get-start.html#installation) `bert-as-service`.
-1. Start server. Example command, where PATH_TO_BERT is path to the directory with a BERT-like model:
+1. Download [UD Russian SynTagRus](https://universaldependencies.org/treebanks/ru_syntagrus/index.html#ud-russian-syntagrus) (train, dev and test splits) to your current directory.
+2. [Install](https://bert-as-service.readthedocs.io/en/latest/section/get-start.html#installation) `bert-as-service`.
+3. Start server. Example command, where PATH_TO_BERT is path to the directory with a BERT-like model:
 
 `bert-serving-start -pooling_strategy NONE -max_seq_len NONE -show_tokens_to_client -cpu -pooling_layer -6 -model_dir PATH_TO_BERT`
 
