@@ -27,7 +27,10 @@ if __name__ == "__main__":
 
     conllu_filenames = [fname for fname in os.listdir(cli_args.conllu_dir)
                         if fname.endswith(".conllu")]
-            
+
+    FEATURE_COUNT = 768
+    FEATURIZER = "bert"
+    
     for fname in conllu_filenames:
             
         split_ = [split_ for split_ in {"train", "dev", "test"} if split_ in fname][0]
