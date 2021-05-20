@@ -9,16 +9,29 @@ from transformers import BertTokenizer
 
 if __name__ == "__main__":
     argp = ArgumentParser()
-    argp.add_argument("--path_to_bert", default=None, type=str,
+    argp.add_argument("--bert_dir", default=None, type=str,
                       help="path to directory with a BERT-like model")
     argp.add_argument("--bert_alias", default=None, type=str,
                       help="alias of a BERT-like model")
+    argp.add_argument("--conllu_dir", default=None, type=str,
+                      help="directory with train, dev and test parts of a conllu UD dataset")
     cli_args = argp.parse_args()
 
-    tokenizer = BertTokenizer.from_pretrained(cli_args.path_to_bert)
+    tokenizer = BertTokenizer.from_pretrained(cli_args.bert_dir)
 
     path = "./embeddings/"
     if not os.path.isdir(path):
         os.mkdir(path)
     if not os.path.isdir(path+cli_args.bert_alias):
         os.mkdir(path+cli_args.bert_alias)
+
+    conllu_filenames = [fname for fname in os.listdir(cli_args.conllu_dir)
+                        if fname.endswith(".conllu")]
+            
+for split_ in {"train", "dev", "test"}:
+    for fname in conllu_filenames:
+        if split_ in fname:
+            
+            data_file = open(cli_args.conllu_dir+"/"+fname, encoding="utf-8")
+            for tokenlist in parse_incr(data_file):
+                sent = [t["form"] for t in tokenlist if type(t["id"]) == int]
