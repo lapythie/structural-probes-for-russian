@@ -28,10 +28,12 @@ if __name__ == "__main__":
     conllu_filenames = [fname for fname in os.listdir(cli_args.conllu_dir)
                         if fname.endswith(".conllu")]
             
-for split_ in {"train", "dev", "test"}:
     for fname in conllu_filenames:
-        if split_ in fname:
             
-            data_file = open(cli_args.conllu_dir+"/"+fname, encoding="utf-8")
-            for tokenlist in parse_incr(data_file):
-                sent = [t["form"] for t in tokenlist if type(t["id"]) == int]
+        split_ = [split_ for split_ in {"train", "dev", "test"} if split_ in fname][0]
+        print(split_)
+        data_file = open(cli_args.conllu_dir+"/"+fname, encoding="utf-8")
+        for sent_id, tokenlist in enumerate(parse_incr(data_file)):
+            sent = [t["form"] for t in tokenlist if type(t["id"]) == int]
+            wordpiece_tokens = [subt for t in sent for subt
+                                in tokenizer.wordpiece_tokenizer.tokenize(t)]
