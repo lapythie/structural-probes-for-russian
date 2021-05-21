@@ -13,6 +13,7 @@ Steps:
 `bert-serving-start -pooling_strategy NONE -max_seq_len NONE -show_tokens_to_client -cpu -pooling_layer -6 -model_dir PATH_TO_BERT`
 
 [Adjust parameters](https://bert-as-service.readthedocs.io/en/latest/source/server.html#BERT%20Parameters) as you wish, but keep `-pooling_strategy NONE`. 7 (aka -6) is presumably the best performing layer (syntax-wise).
+
 4. Run `scripts/conllu_to_bert.py`. Example command:
 
 `py scripts/conllu_to_bert.py --conllu_dir "path/to/dir/with/conllu/files" --bert_dir "path/to/dir/with/bert/model" --bert_alias "rubert"`
