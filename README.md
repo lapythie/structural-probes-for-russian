@@ -19,3 +19,5 @@ Steps:
 `py scripts/conllu_to_bert.py --conllu_dir "path/to/dir/with/conllu/files" --bert_dir "path/to/dir/with/bert/model" --bert_alias "rubert"`
 
 An hdf5 file with embedded conllu dataset will be created at `.embeddings/rubert`.
+
+5. Create config file at `config/one_of_two_task_aliases/preferably_telling_config_name.yaml` where `one_of_two_task_aliases` is either `prd` (parse-dastance probing task) or `pad` (parse-depth probing task). For some reason I used those closely following original notation.
