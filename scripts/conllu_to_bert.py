@@ -2,22 +2,18 @@
 """and only one layer of embeddings to be returned"""
 
 import os
-from argparse import ArgumentParser
-import numpy as np
-from conllu import parse_incr
 import h5py
+import numpy as np
+from tqdm.auto import tqdm
+from conllu import parse_incr
+from argparse import ArgumentParser
 from transformers import BertTokenizer
 from bert_serving.client import BertClient
-from rich import print
-from tqdm.auto import tqdm
 
 argp = ArgumentParser()
-argp.add_argument("--bert_dir", default=None, type=str,
-                  help="path to directory with a BERT-like model")
-argp.add_argument("--bert_alias", default=None, type=str,
-                  help="alias of a BERT-like model")
-argp.add_argument("--conllu_dir", default=None, type=str,
-                  help="directory with train, dev and test parts of a conllu UD dataset")
+argp.add_argument("--bert_dir", default=None, type=str, help="path to directory with a BERT-like model")
+argp.add_argument("--bert_alias", default=None, type=str, help="alias of a BERT-like model")
+argp.add_argument("--conllu_dir", default=None, type=str, help="directory with train, dev and test parts of a conllu UD dataset")
 cli_args = argp.parse_args()
 
 path = "./embeddings/"
@@ -26,13 +22,13 @@ if not os.path.isdir(path):
 if not os.path.isdir(path+cli_args.bert_alias):
     os.mkdir(path+cli_args.bert_alias)
 
+bc = BertClient()
 FEATURE_COUNT = 768
 FEATURIZER = "bert"
-bc = BertClient()
 assert len(bc.server_status['pooling_layer']) == 1
 LAYER_COUNT = len(bc.server_status['pooling_layer'])
-LAYER_NAME = "_".join([str(layer) for layer in bc.server_status['pooling_layer']])
 tokenizer = BertTokenizer.from_pretrained(cli_args.bert_dir)
+LAYER_NAME = "_".join([str(layer) for layer in bc.server_status['pooling_layer']])
 
 conllus = [fname for fname in os.listdir(cli_args.conllu_dir) if fname.endswith(".conllu")]
 embeddings_path = path+cli_args.bert_alias+"/"+cli_args.bert_alias+"_"+LAYER_NAME+".hdf5"
