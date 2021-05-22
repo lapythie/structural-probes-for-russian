@@ -41,9 +41,10 @@ class ProbingDataset(torch.utils.data.Dataset):
                 self.length_to_decay, self.length_to_norm = self.compute_decays_and_norms()
 
     def read_embeddings(self, index):
+        """Reads embeddings from disk one sentence at a time, averages subword embeddings for a token"""
         if self.path_to_tokenizer:
             sentence_embeddings = []
-            dset = self.data_file[f"{self.split_}/bert/{self.layer}/{index}"][...][0]
+            dset = self.data_file["/".join(self.split_, "bert", self.layer, str(index))][...][0]
             for span in self.spans[index]:
                 token_embeddings = dset[slice(*span)]
                 averaged_token_embedding = token_embeddings.mean(axis=0)
@@ -62,6 +63,7 @@ class ProbingDataset(torch.utils.data.Dataset):
 
 
     def trees_sents_roots_lengths(self):
+        """Precomputes and caches dependency trees and their roots"""
         trees = []
         sents = []
         roots = []
@@ -81,6 +83,7 @@ class ProbingDataset(torch.utils.data.Dataset):
         return trees, roots, sents, lengths
 
     def plot(self, id):
+        """Convenience tree plotter, isn't really used any time though"""
         nx.draw(self.trees[id], pos=nx.spring_layout(self.trees[id]), with_labels=True, font_weight='bold')
 
     def __len__(self):
@@ -93,9 +96,10 @@ class ProbingDataset(torch.utils.data.Dataset):
                              embeddings=self.read_embeddings(index))
         
     def wordpiece_tokenize(self):
+        """Subword spans are stored in order to perform averaging of subword embeddings of a token"""
         subtokens = []
         spans = []
-        for sent in tqdm(self.sents, desc="Wordpiece tokenizing:"):
+        for sent in tqdm(self.sents, desc="[wordpiece tokenizing]"):
             sentence_spans = []
             sentence_subtokens = []
             for token in sent:
