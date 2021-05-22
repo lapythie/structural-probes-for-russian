@@ -112,21 +112,18 @@ class ProbingDataset(torch.utils.data.Dataset):
         return dec / self.length_to_norm[ self.lengths[index] ]
 
     def compute_decays_and_norms(self):
+        """Computes and caches weight decay and normalization for all sentence lengths in dataset"""
         decays = {}
         norms = {}
         for length in tqdm(set(self.lengths), desc="[computing decay]"):
             range_ = torch.arange(length, device=self.args["device"])
-
             distances = [torch.arange(0-i, length-i, device=self.args["device"]) for i in range_]
             abs_distances_to_neighbours = torch.vstack(distances).abs()
-            # fp precision gotcha strikes if you use .pow instead of .float_power
-#             squared_abs_distances_to_neighbours = torch.float_power(2, abs_distances_to_neighbours)
+            # fp precision gotcha strikes if you use .pow without double precision
             squared_abs_distances_to_neighbours = torch.pow(2, abs_distances_to_neighbours.double())
             decays.update({ length: torch.true_divide(1, squared_abs_distances_to_neighbours) })
 
-#             norm = 1 / torch.float_power(2, range_)
             norm = 1 / torch.pow(2, range_.double())
-            
             norm = torch.tensor([norm[:i+1].sum() for i in range_], device=self.args["device"])
             norms.update({length: (norm + norm.flip([0])).unsqueeze(1)})
         return decays, norms
@@ -153,3 +150,4 @@ class ProbingDataset(torch.utils.data.Dataset):
     
     def loader(self):
         return torch.utils.data.DataLoader(self, batch_size=self.batch_size, collate_fn=self.custom_pad)
+
