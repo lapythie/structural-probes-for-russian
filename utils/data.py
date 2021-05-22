@@ -1,10 +1,13 @@
 import os
 import h5py
+import yaml
 import torch
 import numpy as np
 import torch.nn as nn
+import networkx as nx
 from tqdm.auto import tqdm
 from conllu import parse_incr
+from collections import namedtuple
 from argparse import ArgumentParser
 from transformers import BertTokenizer
 
@@ -69,7 +72,7 @@ class ProbingDataset(torch.utils.data.Dataset):
         roots = []
         lengths = []
         with open(self.path_to_conllu, encoding="utf-8") as data_file:
-            for tokenlist in parse_incr(data_file):
+            for tokenlist in tqdm(parse_incr(data_file), desc="[building trees]"):
                 tokens = [t["form"] for t in tokenlist if type(t["id"]) == int]
                 sents.append(tokens)
                 lengths.append(len(tokens))
@@ -80,6 +83,8 @@ class ProbingDataset(torch.utils.data.Dataset):
                 root = [t["id"] for t in tokenlist if t["head"] == 0]
                 assert len(root) == 1
                 roots.append(root[0])
+                if len(sents) == 100:
+                    break
         return trees, roots, sents, lengths
 
     def plot(self, id):
@@ -96,7 +101,7 @@ class ProbingDataset(torch.utils.data.Dataset):
                              embeddings=self.read_embeddings(index))
         
     def wordpiece_tokenize(self):
-        """Subword spans are stored in order to perform averaging of subword embeddings of a token"""
+        """Subword spans are cached in order to perform averaging of subword embeddings of a token"""
         subtokens = []
         spans = []
         for sent in tqdm(self.sents, desc="[wordpiece tokenizing]"):
