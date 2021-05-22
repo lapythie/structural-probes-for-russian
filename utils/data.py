@@ -107,6 +107,7 @@ class ProbingDataset(torch.utils.data.Dataset):
         return subtokens, spans
 
     def decay(self, embeddings, index):
+        """Weights decay exponentially as distance between tokens increases"""
         decay = self.length_to_decay[ self.lengths[index] ]
         dec = torch.matmul(decay, torch.tensor(embeddings, device=self.args["device"]).double())
         return dec / self.length_to_norm[ self.lengths[index] ]
@@ -118,9 +119,9 @@ class ProbingDataset(torch.utils.data.Dataset):
         for length in tqdm(set(self.lengths), desc="[computing decay]"):
             range_ = torch.arange(length, device=self.args["device"])
             distances = [torch.arange(0-i, length-i, device=self.args["device"]) for i in range_]
-            abs_distances_to_neighbours = torch.vstack(distances).abs()
+            abs_distances_to_neighbours = torch.vstack(distances).abs().double()
             # fp precision gotcha strikes if you use .pow without double precision
-            squared_abs_distances_to_neighbours = torch.pow(2, abs_distances_to_neighbours.double())
+            squared_abs_distances_to_neighbours = torch.pow(2, abs_distances_to_neighbours)
             decays.update({ length: torch.true_divide(1, squared_abs_distances_to_neighbours) })
 
             norm = 1 / torch.pow(2, range_.double())
