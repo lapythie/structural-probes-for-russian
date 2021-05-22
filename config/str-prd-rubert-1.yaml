@@ -1,0 +1,29 @@
+device: cpu
+corpus:
+    corpus_root: .
+    train_path: ru_syntagrus-ud-train.conllu
+    dev_path: ru_syntagrus-ud-dev.conllu
+    test_path: ru_syntagrus-ud-test.conllu
+featurizer:
+    dim: 768
+    featurizer_type: rubert
+    decay: False
+    projection: False
+    layer: '-12' # rubert, mbert: (-12,...,-1); elmo: (0, 1, 2)
+    path_to_embeddings: embeddings/rubert/rubert_-12.hdf5
+    path_to_tokenizer: models/rubert_cased_L-12_H-768_A-12_v2 # DeepPavlov/rubert-base-cased
+probe:
+    params_path: predictors/prd/rubert/predictor-rubert-1-prd.pt
+    predictions_path: predictions/prd/rubert/prediction-rubert-1-prd.pt
+    rank: 768
+    task: parse-distance
+probe_training:
+    batch_size: 20
+    initial_lr: 0.001
+    max_epochs: 40
+reporting:
+    reporting_root: reporting/prd/rubert
+    reporting_methods:
+        - spearmanr
+        - image_examples
+        - uuas
