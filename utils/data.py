@@ -20,7 +20,11 @@ def random_lstm(args):
     return lstm.to(args["device"])
 
 class ProbingDataset(torch.utils.data.Dataset):
+    """Reads conllu files
 
+    Attributes:
+        args: config dictionary from a yaml file
+    """
     def __init__(self, args, path_to_conllu, cached_labels):
         self.args=args
         self.path_to_conllu = path_to_conllu
@@ -161,3 +165,22 @@ class ProbingDataset(torch.utils.data.Dataset):
     def loader(self):
         return torch.utils.data.DataLoader(self, batch_size=self.batch_size, collate_fn=self.custom_pad)
 
+class OneWordDataset(ProbingDataset):
+    """Computes Depth labels for probing task"""
+    def __init__(self, args, path_to_conllu, cached_labels=False):
+        super().__init__(args, path_to_conllu, cached_labels)
+        self.labels = self.cached_labels if self.cached_labels else self.compute_labels()
+
+    def __getitem__(self, index):
+        return super().__getitem__(index), self.labels[index]
+
+    def compute_labels(self):
+        """Computes depth labels using precomputed trees"""
+        depths = []
+        for tree, root_id, sent in tqdm(zip(self.trees, self.roots, self.sents), desc="[computing depth labels]"):
+            sent_depths = torch.zeros(len(sent))
+            for node_id in range(len(sent)):
+                # all node ids must be > 0 because of conllu notation
+                sent_depths[node_id] = nx.shortest_path_length(tree, root_id, node_id+1)
+            depths.append(sent_depths)
+        return depths
