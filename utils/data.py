@@ -190,7 +190,7 @@ class OneWordDataset(ProbingDataset):
 
 class TwoWordDataset(ProbingDataset):
     """Computes Distance labels for probing task"""
-    def __init__(self, args, path_to_conllu, cached_labels=True):
+    def __init__(self, args, path_to_conllu, cached_labels=False):
         super().__init__(args, path_to_conllu, cached_labels)
         self.labels = self.cached_labels if self.cached_labels else self.compute_labels()
 
