@@ -11,6 +11,7 @@ from collections import namedtuple
 from argparse import ArgumentParser
 from transformers import BertTokenizer
 
+
 def random_lstm(args):
     inp_size = args["featurizer"]["dim"]
     lstm = nn.LSTM(input_size=inp_size, hidden_size=int(inp_size/2),
@@ -18,6 +19,7 @@ def random_lstm(args):
     for p in lstm.parameters():
         p.requires_grad = False
     return lstm.to(args["device"])
+
 
 class ProbingDataset(torch.utils.data.Dataset):
     """Reads conllu files
@@ -67,7 +69,6 @@ class ProbingDataset(torch.utils.data.Dataset):
                     proj, _ = self.projection(torch.tensor(sentence_embeddings, device=args["device"]).unsqueeze(0))
                 sentence_embeddings = proj.squeeze(0)
         return sentence_embeddings
-
 
     def trees_sents_roots_lengths(self):
         """Precomputes and caches dependency trees and their roots"""
@@ -165,6 +166,7 @@ class ProbingDataset(torch.utils.data.Dataset):
     def loader(self):
         return torch.utils.data.DataLoader(self, batch_size=self.batch_size, collate_fn=self.custom_pad)
 
+
 class OneWordDataset(ProbingDataset):
     """Computes Depth labels for probing task"""
     def __init__(self, args, path_to_conllu, cached_labels=False):
@@ -184,3 +186,26 @@ class OneWordDataset(ProbingDataset):
                 sent_depths[node_id] = nx.shortest_path_length(tree, root_id, node_id+1)
             depths.append(sent_depths)
         return depths
+
+
+class TwoWordDataset(ProbingDataset):
+    """Computes Distance labels for probing task"""
+    def __init__(self, args, path_to_conllu, cached_labels=True):
+        super().__init__(args, path_to_conllu, cached_labels)
+        self.labels = self.cached_labels if self.cached_labels else self.compute_labels()
+
+    def __getitem__(self, index):
+        return super().__getitem__(index), self.labels[index]
+
+    def compute_labels(self):
+        distances = []
+        for tree, sent in tqdm(zip(self.trees, self.sents), desc="[computing distance labels]"):
+            sent_distances = torch.zeros((len(sent), len(sent)))
+            for i in range(len(sent)):
+                for j in range(i, len(sent)):
+                    ## +1 bc node ids start from 1
+                    i_j_distance = nx.shortest_path_length(tree, i+1, j+1)
+                    sent_distances[i][j] = i_j_distance
+                    sent_distances[j][i] = i_j_distance
+            distances.append(sent_distances)
+        return distances
