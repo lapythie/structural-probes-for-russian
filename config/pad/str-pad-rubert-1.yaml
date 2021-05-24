@@ -11,7 +11,7 @@ featurizer:
     projection: False
     layer: '-12' # rubert, mbert: (-12,...,-1); elmo: (0, 1, 2)
     path_to_embeddings: embeddings/rubert/rubert_-12.hdf5
-    path_to_tokenizer: models/rubert_cased_L-12_H-768_A-12_v2 # DeepPavlov/rubert-base-cased
+    path_to_tokenizer: DeepPavlov/rubert-base-cased # models/rubert_cased_L-12_H-768_A-12_v2
 probe:
     params_path: predictors/pad/rubert/predictor-rubert-1-pad.pt
     predictions_path: predictions/pad/rubert/prediction-rubert-1-pad.pt
