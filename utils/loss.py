@@ -11,6 +11,21 @@ class L1DistanceLoss(nn.Module):
         self.dims_to_sum_along = (1, 2)
 
     def forward(self, y_pred, y_true, lengths):
+        """Computes L1 loss on distance matrices, ignores -1 label padding.
+
+        Normalizes first within a sentence by dividing by the square of the sentence length,
+        and then accross the batch.
+
+        Args:
+            :y_pred: batch of predicted distances
+            :y_true: batch of true distances
+            :lengths: batch of sentence lengths
+
+        Returns:
+            A tuple of:
+                :batch_loss: average loss of the batch
+                :total_sents: number of sentences in the batch
+        """
         mask = (y_true != -1).float()
         y_pred = y_pred * mask
         y_true = y_true * mask
@@ -26,13 +41,28 @@ class L1DistanceLoss(nn.Module):
         return batch_loss, total_sents
 
 class L1DepthLoss(nn.Module):
-    """Custom L2 loss for parse-depth probing task."""
+    """Custom L1 loss for parse-depth probing task."""
     def __init__(self, args):
         super().__init__()
         self.args = args
         self.dims_to_sum_along = 1
 
     def forward(self, y_pred, y_true, lengths):
+        """Computes L1 loss on depth sequences, ignores -1 label padding.
+
+        Normalizes first within a sentence by dividing by the sentence length,
+        and then accross the batch.
+
+        Args:
+            :y_pred: batch of predicted depths
+            :y_true: batch of true depths
+            :lengths: batch of sentence lengths
+
+        Returns:
+            A tuple of:
+                :batch_loss: average loss of the batch
+                :total_sents: number of sentences in the batch
+        """
         mask = (y_true != -1).float()
         y_pred = y_pred * mask
         y_true = y_true * mask
