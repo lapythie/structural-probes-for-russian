@@ -7,7 +7,7 @@ class Probe(nn.Module):
     pass
 
 class TwoWordProbe(Probe):
-    """ Computes squared L2 distance after projection by a matrix."""
+    """Computes squared L2 distance after projection by a matrix."""
     def __init__(self, args):
         super().__init__()
         self.rank = args["probe"]["rank"]
@@ -27,6 +27,7 @@ class TwoWordProbe(Probe):
         return squared_distances
 
 class OneWordProbe(Probe):
+    """Computes squared L2 norms after projection by a matrix"""
     def __init__(self, args):
         super().__init__()
         self.rank = args["probe"]["rank"]
