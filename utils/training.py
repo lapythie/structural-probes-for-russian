@@ -12,12 +12,20 @@ class ProbeTrainer:
         self.probe_params_path = args["probe"]["params_path"]
 
     def set_optimizer(self, probe):
-        """Sets optimizer and scheduler for training"""
+        """Sets optimizer and scheduler for training.
+        Learning rate decays by a factor of 0.1 if loss doesn't improve after an epoch"""
         self.optimizer = torch.optim.Adam(probe.parameters(), lr=self.initial_lr)
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode="min", factor=0.1, patience=0)
 
-    def predict(self):
-        pass
+    def predict(probe, dataset):
+        """Predicts distance or depth labels"""
+        probe.eval()
+        predictions_by_batch = []
+        for x, y_true, lengths, observations in tqdm(dataset.loader(), desc="[predicting]"):
+            y_pred = probe(x)
+            predictions_by_batch.append(y_pred.detach().cpu().numpy())
+        predictions = [preds for batch in predictions_by_batch for preds in batch] #comment out to get batched predictions
+        return predictions
 
     def train_until_convergence(self, probe, path_to_embeddings, loss, train_loader, dev_loader):
         """Trains a probe untill loss on dev dataset does not improve
