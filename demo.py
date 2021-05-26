@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 from transformers import BertTokenizer
 
 from utils.data import TwoWordDataset
-
+from utils.probe import TwoWordProbe
 
 argp = ArgumentParser()
 argp.add_argument("--config_path", default=None, type=str, help="path to yaml config file")
@@ -33,3 +33,6 @@ torch.backends.cudnn.benchmark = False
     
 train = TwoWordDataset(args=args, path_to_conllu=path_to_train)
 dev = TwoWordDataset(args=args, path_to_conllu=path_to_dev)
+
+probe = TwoWordProbe(args)
+
