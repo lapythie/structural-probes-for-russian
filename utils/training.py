@@ -12,6 +12,7 @@ class ProbeTrainer:
         self.probe_params_path = args["probe"]["params_path"]
 
     def set_optimizer(self, probe):
+        """Sets optimizer and scheduler for training"""
         self.optimizer = torch.optim.Adam(probe.parameters(), lr=self.initial_lr)
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode="min", factor=0.1, patience=0)
 
@@ -19,7 +20,10 @@ class ProbeTrainer:
         pass
 
     def train_until_convergence(self, probe, path_to_embeddings, loss, train_loader, dev_loader):
-        
+        """Trains a probe untill loss on dev dataset does not improve
+        by more than 0.0001 for 5 epochs straight.
+
+        Writes parameters of th probe to the disk at the location specified by config."""
         self.set_optimizer(probe)
         min_dev_loss = float("inf")
         min_dev_loss_epoch = -1
