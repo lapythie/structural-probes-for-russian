@@ -7,7 +7,13 @@ class Probe(nn.Module):
     pass
 
 class TwoWordProbe(Probe):
-    """Computes squared L2 distance after projection by a matrix."""
+    """Computes squared L2 distance after projection by a matrix.
+
+    For a batch of sentences predicts all n^2 distances
+    for all word pairs in each sentence in the batch.
+    
+    Sentences are padded with zero to reach the maximum sentence length in the batch.
+    """
     def __init__(self, args):
         super().__init__()
         self.rank = args["probe"]["rank"]
@@ -17,6 +23,14 @@ class TwoWordProbe(Probe):
         self.to(args["device"])
 
     def forward(self, x):
+        """Computes (B(h_i - h_j))^T(B(h_i - h_j)) for all i, j in a sentence
+
+        Args:
+            :x: a batch of embeddings of shape (batch_size, max_sent_len, embedding_dim)
+
+        Returns:
+            a tensor of distance labels of shape (batch_size, max_sent_len, max_sent_len)
+        """
         x = torch.matmul(x.float(), self.proj)
         batch_size, seqlen, rank = x.size()
         x = x.unsqueeze(2)
@@ -27,7 +41,13 @@ class TwoWordProbe(Probe):
         return squared_distances
 
 class OneWordProbe(Probe):
-    """Computes squared L2 norms after projection by a matrix"""
+    """Computes squared L2 norms after projection by a matrix.
+
+    For a batch of sentences predicts all n depths
+    for all words in each sentence in the batch.
+    
+    Sentences are padded with zero to reach the maximum sentence length in the batch.
+    """
     def __init__(self, args):
         super().__init__()
         self.rank = args["probe"]["rank"]
@@ -37,6 +57,14 @@ class OneWordProbe(Probe):
         self.to(args["device"])
 
     def forward(self, x):
+        """Computes (B(h_i))^T(B(h_i)) for all i in a sentence
+
+        Args:
+            :x: a batch of embeddings of shape (batch_size, max_sent_len, embedding_dim)
+
+        Returns:
+            a tensor of depth labels of shape (batch_size, max_sent_len)
+        """
         x = torch.matmul(x.float(), self.proj)
         batch_size, seqlen, rank = x.size()
         norms = torch.bmm(x.view(batch_size*seqlen, 1, rank), x.view(batch_size*seqlen, rank, 1))
