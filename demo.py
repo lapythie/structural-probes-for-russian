@@ -25,6 +25,8 @@ path_to_train = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_d
                                          if p.endswith(".conllu") and "train" in p][0]
 path_to_dev = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_dir)
                                        if p.endswith(".conllu") and "dev" in p][0]
+path_to_test = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_dir)
+                                       if p.endswith(".conllu") and "test" in p][0]
 
 args = yaml.safe_load(open(cli_args.config_path))
 task = args["probe"]["task"]
@@ -44,10 +46,20 @@ if task == "parse-distance":
     dev = TwoWordDataset(args=args, path_to_conllu=path_to_dev)
     loss = L1DistanceLoss(args)
     probe = TwoWordProbe(args)
+    test = TwoWordDataset(args, path_to_conllu=path_to_test)
 elif task == "parse-depth":
     train = OneWordDataset(args=args, path_to_conllu=path_to_train)
     dev = OneWordDataset(args=args, path_to_conllu=path_to_dev)
     loss = L1DepthLoss(args)
     probe = OneWordProbe(args)
+    test = OneWordDataset(args, path_to_conllu=path_to_test)
 
 trainer.train_until_convergence(probe=probe, loss=loss, train_loader=train.loader(), dev_loader=dev.loader())
+
+prediction_root = os.path.join(*args["probe"]["predictions_path"].split("/")[:-1])
+os.makedirs(prediction_root, exist_ok=True)
+
+params = torch.load(args["probe"]["params_path"], map_location=torch.device('cpu'))
+probe.load_state_dict(params)
+predictions = predict(probe, test)
+torch.save(predictions, args["probe"]["predictions_path"])
