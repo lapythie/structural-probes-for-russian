@@ -53,7 +53,8 @@ class ProbingDataset(torch.utils.data.Dataset):
         """Reads embeddings from disk one sentence at a time, averages subword embeddings for a token"""
         if self.path_to_tokenizer:
             sentence_embeddings = []
-            dset = self.data_file["/".join(self.split_, "bert", self.layer, str(index))][...][0]
+            dset_path = "/".join([self.split_, "bert", self.layer, str(index)])
+            dset = self.data_file[dset_path][...][0]
             for span in self.spans[index]:
                 token_embeddings = dset[slice(*span)]
                 averaged_token_embedding = token_embeddings.mean(axis=0)

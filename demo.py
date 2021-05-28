@@ -14,13 +14,13 @@ from transformers import BertTokenizer
 from utils.data import TwoWordDataset
 from utils.probe import TwoWordProbe
 from utils.training import ProbeTrainer, predict
+from utils.loss import L1DistanceLoss
 
 argp = ArgumentParser()
 argp.add_argument("--config_path", default=None, type=str, help="path to yaml config file")
 argp.add_argument("--conllu_dir", default=None, type=str, help="directory with train, dev and test parts of a conllu UD dataset")
 cli_args = argp.parse_args()
 
-##path_to_config = "config/prd/str-prd-rubert-1.yaml"
 path_to_train = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_dir)
                                          if p.endswith(".conllu") and "train" in p][0]
 path_to_dev = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_dir)
@@ -37,3 +37,9 @@ dev = TwoWordDataset(args=args, path_to_conllu=path_to_dev)
 
 probe = TwoWordProbe(args)
 trainer = ProbeTrainer(args)
+
+predictor_root = os.path.join(*trainer.probe_params_path.split("/")[:-1])
+os.makedirs(predictor_root, exist_ok=True)
+
+trainer.train_until_convergence(probe=probe, loss=L1DistanceLoss(args),
+                                train_loader=train.loader(), dev_loader=dev.loader())
