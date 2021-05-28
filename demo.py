@@ -18,17 +18,14 @@ from utils.training import ProbeTrainer, predict
 
 argp = ArgumentParser()
 argp.add_argument("--config_path", default=None, type=str, help="path to yaml config file")
-argp.add_argument("--conllu_dir", default=None, type=str, help="directory with train, dev and test parts of a conllu UD dataset")
 cli_args = argp.parse_args()
 
-path_to_train = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_dir)
-                                         if p.endswith(".conllu") and "train" in p][0]
-path_to_dev = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_dir)
-                                       if p.endswith(".conllu") and "dev" in p][0]
-path_to_test = cli_args.conllu_dir+"/"+[p for p in os.listdir(cli_args.conllu_dir)
-                                       if p.endswith(".conllu") and "test" in p][0]
-
 args = yaml.safe_load(open(cli_args.config_path))
+
+path_to_train = os.path.join(args["corpus"]["corpus_root"], args["corpus"]["train_path"])
+path_to_dev = os.path.join(args["corpus"]["corpus_root"], args["corpus"]["dev_path"])
+path_to_test = os.path.join(args["corpus"]["corpus_root"], args["corpus"]["test_path"])
+
 task = args["probe"]["task"]
 
 np.random.seed(0)
@@ -42,12 +39,15 @@ predictor_root = os.path.join(*trainer.probe_params_path.split("/")[:-1])
 os.makedirs(predictor_root, exist_ok=True)
 
 if task == "parse-distance":
+    
     train = TwoWordDataset(args=args, path_to_conllu=path_to_train)
     dev = TwoWordDataset(args=args, path_to_conllu=path_to_dev)
     loss = L1DistanceLoss(args)
     probe = TwoWordProbe(args)
     test = TwoWordDataset(args, path_to_conllu=path_to_test)
+
 elif task == "parse-depth":
+    
     train = OneWordDataset(args=args, path_to_conllu=path_to_train)
     dev = OneWordDataset(args=args, path_to_conllu=path_to_dev)
     loss = L1DepthLoss(args)
