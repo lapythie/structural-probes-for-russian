@@ -42,6 +42,7 @@ lass Reporter:
              self.report_root_acc()
         
     def report_spearmanr(self):
+        """Computes Spearman correlation between predicted and gold labels."""
         sentlen_to_spearmanrs = defaultdict(list)
         for y_pred, y_true, length in tqdm(zip(self.predictions, self.labels, self.lengths), 
                                            total=len(self.predictions), desc="[computing spearmanr]"):
@@ -63,7 +64,8 @@ lass Reporter:
 
         print(f"{self.rank} - rank. {self.layer} - layer.\tMean Spearman correlation - {mean}")
     
-    def report_uuas(self, print_tikz=True):
+    def report_uuas(self):
+        """Computes UUAS score for a dataset"""
         uspan_total = 0
         uspan_correct = 0
         for y_pred, length, tree, upos, sent, edge2dep in tqdm(zip(self.predictions, self.lengths, self.trees, self.uposes, 
@@ -83,7 +85,8 @@ lass Reporter:
             uspan_total += len(gold_nonpunc_edges)
             
             gold_edge_num = len(gold_nonpunc_edges)
-            
+
+            # TODO: clean up
             d = {"sent_uuas": len(set(gold_nonpunc_edges) & set(pred_nonpunc_edges)) / gold_edge_num if gold_edge_num else 0,
                 "length": length, "sent":sent, "gold_edge_num": gold_edge_num,
                 "latex": self.print_tikz(pred_nonpunc_edges, gold_nonpunc_edges, sent)}
@@ -102,6 +105,7 @@ lass Reporter:
          print(f"{self.rank} - rank. {self.layer} - layer.\tUUAS score - {uuas}")
     
     def report_root_acc(self):
+        """Computes root prediction accuracy"""
         correct_root_predictions = 0
         for y_pred, y_true, length, upos in tqdm(zip(self.predictions, self.labels, self.lengths, self.uposes), 
                                                total=len(self.predictions), desc="[computing root accuracy]"):
@@ -115,6 +119,7 @@ lass Reporter:
         print(f"{self.rank} - rank. {self.layer} - layer.\tRoot accuracy score - {root_acc}")
         
     def trees_sents_uposes(self):
+        """Builds sentence trees"""
         trees = []
         sents = []
         uposes = []
@@ -126,6 +131,7 @@ lass Reporter:
                 
                 sents.append([t["form"] for t in tokenlist if type(t["id"]) == int])
                 G = nx.Graph()
+                # TODO: remove trees, leave only edges
                 G.add_edges_from([(t["id"], t["head"]) for t in tokenlist 
                                   if (type(t["id"]) == int) and (t["head"] != 0)])
                 assert nx.is_tree(G)
@@ -133,6 +139,7 @@ lass Reporter:
         return trees, sents, uposes
     
     def compute_deps(self):
+        """Parses nonpunct dependency labels"""
         deps = []
         path = self.args["corpus"]["corpus_root"]+"/"+self.args["corpus"]["test_path"]
         with open(path, encoding="utf-8") as data_file:
@@ -148,6 +155,7 @@ lass Reporter:
         return deps
     
     def print_tikz(self, predicted_edges, gold_edges, words):
+        """Returns LaTeX visualizing gold and predicted dependencies with tikz-dependency LaTeX package"""
         s = """\\begin{dependency}[hide label, edge unit distance=.5ex]
         \\begin{deptext}[column sep=0.05cm]
         """ 
