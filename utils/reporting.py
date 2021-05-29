@@ -12,7 +12,7 @@ from conllu import parse_incr
 import yaml
 import torch
 
-lass Reporter:
+class Reporter:
     """Reporting class for parse-distance and parse-depth probing tasks, reports on test set"""
     def __init__(self, args, cached_labels):
         self.args = args
@@ -90,7 +90,7 @@ lass Reporter:
             d = {"sent_uuas": len(set(gold_nonpunc_edges) & set(pred_nonpunc_edges)) / gold_edge_num if gold_edge_num else 0,
                 "length": length, "sent":sent, "gold_edge_num": gold_edge_num,
                 "latex": self.print_tikz(pred_nonpunc_edges, gold_nonpunc_edges, sent)}
-            ID2LATEX.append(d)
+##            ID2LATEX.append(d)   
 
             for edge in correct_nonpunct_edges:
                 self.correct_deps[edge2dep[edge]] += 1
