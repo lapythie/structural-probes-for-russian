@@ -63,3 +63,6 @@ params = torch.load(args["probe"]["params_path"], map_location=torch.device('cpu
 probe.load_state_dict(params)
 predictions = predict(probe, test)
 torch.save(predictions, args["probe"]["predictions_path"])
+
+reporting_root = args["reporting"]["reporting_root"]
+os.makedirs(reporting_root, exist_ok=True)
