@@ -180,7 +180,7 @@ class Reporter:
         ax.set_title("Gold Parse Distance")
         ax.set_xticks(np.arange(length))
         ax.set_yticks(np.arange(length))
-        ax.set_xticklabels(words, rotation=90, ha="center")
+        ax.set_xticklabels(words, rotation=90, ha="left")
         ax.set_yticklabels(words, rotation=0, va="top")
         plt.tight_layout()
         plt.show();
@@ -190,7 +190,7 @@ class Reporter:
         ax.set_title("Predicted Parse Distance (squared)")
         ax.set_xticks(np.arange(length))
         ax.set_yticks(np.arange(length))
-        ax.set_xticklabels(words, rotation=90, ha="center")
+        ax.set_xticklabels(words, rotation=90, ha="left")
         ax.set_yticklabels(words, rotation=0, va="top")
         plt.tight_layout()
         plt.show();
