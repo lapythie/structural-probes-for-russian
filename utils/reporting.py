@@ -163,7 +163,7 @@ class Reporter:
         return s
     
     def report_distance_image(self, sent_id):
-        
+        """Writes heatmaps of predicted and gold distances in a sentence to disk."""
         words = self.sents[sent_id]
         length = self.lengths[sent_id]
         prediction = self.predictions[sent_id][:length, :length]
