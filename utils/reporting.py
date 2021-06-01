@@ -32,8 +32,6 @@ class Reporter:
         self.labels = cached_labels
         self.lengths = [len(label) for label in self.labels]
         self.edges, self.sents, self.uposes = self.edges_sents_uposes()
-        self.total_deps, self.correct_deps, self.total_span_len = defaultdict(int), defaultdict(int), defaultdict(int)
-        self.deps = self.compute_deps()
 
         self.report_spearmanr()
         if args["probe"]["task"] == "parse-distance":
@@ -99,6 +97,7 @@ class Reporter:
         for y_pred, y_true, length, upos in tqdm(zip(self.predictions, self.labels, self.lengths, self.uposes), 
                                                total=len(self.predictions), desc="[computing root accuracy]"):
             y_pred = y_pred[:length]
+            y_true = y_true[:length]
             nonpunc_depth_sorted_indices = sorted([(i, depth) for i, depth in enumerate(y_pred) 
                                                    if upos[i] != "PUNCT"], key=lambda tup: tup[1])
             correct_root_predictions += list(y_true).index(0) == nonpunc_depth_sorted_indices[0][0]
