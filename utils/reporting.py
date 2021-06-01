@@ -31,15 +31,15 @@ class Reporter:
 ##        self.labels = torch.load(self.labels_path, map_location=torch.device('cpu'))
         self.labels = cached_labels
         self.lengths = [len(label) for label in self.labels]
-        self.trees, self.sents, self.uposes = self.trees_sents_uposes()
+        self.edges, self.sents, self.uposes = self.edges_sents_uposes()
         self.total_deps, self.correct_deps, self.total_span_len = defaultdict(int), defaultdict(int), defaultdict(int)
         self.deps = self.compute_deps()
-        
-         self.report_spearmanr()
+
+        self.report_spearmanr()
         if args["probe"]["task"] == "parse-distance":
             self.report_uuas()
-         elif args["probe"]["task"] == "parse-depth":
-             self.report_root_acc()
+        elif args["probe"]["task"] == "parse-depth":
+            self.report_root_acc()
         
     def report_spearmanr(self):
         """Computes Spearman correlation between predicted and gold labels."""
@@ -68,7 +68,7 @@ class Reporter:
         """Computes UUAS score for a dataset"""
         uspan_total = 0
         uspan_correct = 0
-        for y_pred, length, tree, upos, sent, edge2dep in tqdm(zip(self.predictions, self.lengths, self.trees, self.uposes, 
+        for y_pred, length, gold_edges, upos, sent, edge2dep in tqdm(zip(self.predictions, self.lengths, self.edges, self.uposes, 
                                                          self.sents, self.deps), total=len(self.sents), desc="[computing uuas]"):
             G_pred = nx.Graph()
             for i in range(length):
@@ -77,7 +77,7 @@ class Reporter:
             pred_edges = list(nx.minimum_spanning_tree(G_pred, algorithm="prim").edges)
             pred_nonpunc_edges = [tuple(sorted(e)) for e in pred_edges 
                                   if (upos[int(e[0])-1] != "PUNCT") and (upos[int(e[1])-1] != "PUNCT")]
-            gold_nonpunc_edges = [tuple(sorted(e)) for e in list(tree.edges) 
+            gold_nonpunc_edges = [tuple(sorted(e)) for e in gold_edges 
                                   if (upos[int(e[0])-1] != "PUNCT") and (upos[int(e[1])-1] != "PUNCT")]
             
             correct_nonpunct_edges = set(gold_nonpunc_edges) & set(pred_nonpunc_edges)
@@ -94,9 +94,9 @@ class Reporter:
             
         uuas = uspan_correct / uspan_total
         
-         with open(self.reporting_root+"/"+f"rank{self.rank}-layer-{self.layer}-{self.split_}.uuas", "w") as f:
-             f.write(str(uuas))
-         print(f"{self.rank} - rank. {self.layer} - layer.\tUUAS score - {uuas}")
+        with open(self.reporting_root+"/"+f"rank{self.rank}-layer-{self.layer}-{self.split_}.uuas", "w") as f:
+            f.write(str(uuas))
+        print(f"{self.rank} - rank. {self.layer} - layer.\tUUAS score - {uuas}")
     
     def report_root_acc(self):
         """Computes root prediction accuracy"""
@@ -112,25 +112,26 @@ class Reporter:
             f.write(str(root_acc))
         print(f"{self.rank} - rank. {self.layer} - layer.\tRoot accuracy score - {root_acc}")
         
-    def trees_sents_uposes(self):
-        """Builds sentence trees"""
-        trees = []
+    def edges_sents_uposes(self):
+        """Parses gold edges"""
+        edges = []
+##        trees = []
         sents = []
         uposes = []
         path = self.args["corpus"]["corpus_root"]+"/"+self.args["corpus"]["test_path"]
         with open(path, encoding="utf-8") as data_file:
-            for tokenlist in tqdm(parse_incr(data_file), total=len(self.predictions), desc="[building trees]"):
+            for tokenlist in tqdm(parse_incr(data_file), total=len(self.predictions), desc="[parsing gold edges]"):
                 upos = [t["upos"] for t in tokenlist if type(t["id"]) == int]
                 uposes.append(upos)
                 
                 sents.append([t["form"] for t in tokenlist if type(t["id"]) == int])
-                G = nx.Graph()
+##                G = nx.Graph()
                 # TODO: remove trees, leave only edges
-                G.add_edges_from([(t["id"], t["head"]) for t in tokenlist 
-                                  if (type(t["id"]) == int) and (t["head"] != 0)])
-                assert nx.is_tree(G)
-                trees.append(G)
-        return trees, sents, uposes
+                sent_edges = [(t["id"], t["head"]) for t in tokenlist if (type(t["id"]) == int) and (t["head"] != 0)]
+                edges.append(sent_edges)
+##                assert nx.is_tree(G)
+##                trees.append(G)
+        return edges, sents, uposes
     
     def compute_deps(self):
         """Parses nonpunct dependency labels"""
