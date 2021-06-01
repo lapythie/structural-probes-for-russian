@@ -167,3 +167,30 @@ class Reporter:
             s += '\\depedge[edge style={{red!60!}}, edge below]{{{}}}{{{}}}{{{}}}\n'.format(i, j, '.')
         s += '\\end{dependency}\n'
         return s
+    
+    def report_distance_image(self, sent_id):
+        
+        words = self.sents[sent_id]
+        length = self.lengths[sent_id]
+        prediction = self.predictions[sent_id][:length, :length]
+        label = self.labels[sent_id][:length, :length]
+        
+        plt.clf()
+        ax = sns.heatmap(label)
+        ax.set_title("Gold Parse Distance")
+        ax.set_xticks(np.arange(length))
+        ax.set_yticks(np.arange(length))
+        ax.set_xticklabels(words, rotation=90, ha="center")
+        ax.set_yticklabels(words, rotation=0, va="top")
+        plt.tight_layout()
+        plt.show();
+
+        plt.clf()
+        ax = sns.heatmap(prediction)
+        ax.set_title("Predicted Parse Distance (squared)")
+        ax.set_xticks(np.arange(length))
+        ax.set_yticks(np.arange(length))
+        ax.set_xticklabels(words, rotation=90, ha="center")
+        ax.set_yticklabels(words, rotation=0, va="top")
+        plt.tight_layout()
+        plt.show();
