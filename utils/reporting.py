@@ -84,13 +84,7 @@ class Reporter:
             uspan_correct += len(correct_nonpunct_edges)
             uspan_total += len(gold_nonpunc_edges)
             
-            gold_edge_num = len(gold_nonpunc_edges)
-
-            # TODO: clean up
-            d = {"sent_uuas": len(set(gold_nonpunc_edges) & set(pred_nonpunc_edges)) / gold_edge_num if gold_edge_num else 0,
-                "length": length, "sent":sent, "gold_edge_num": gold_edge_num,
-                "latex": self.print_tikz(pred_nonpunc_edges, gold_nonpunc_edges, sent)}
-##            ID2LATEX.append(d)   
+            gold_edge_num = len(gold_nonpunc_edges) 
 
             for edge in correct_nonpunct_edges:
                 self.correct_deps[edge2dep[edge]] += 1
