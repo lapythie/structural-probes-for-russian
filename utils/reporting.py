@@ -68,8 +68,9 @@ class Reporter:
         """Computes UUAS score for a dataset"""
         uspan_total = 0
         uspan_correct = 0
-        for y_pred, length, gold_edges, upos, sent, edge2dep in tqdm(zip(self.predictions, self.lengths, self.edges, self.uposes, 
-                                                         self.sents, self.deps), total=len(self.sents), desc="[computing uuas]"):
+
+        for y_pred, length, gold_edges, upos, sent in tqdm(zip(self.predictions, self.lengths, self.edges, self.uposes,
+                                                               self.sents), total=len(self.sents), desc="[computing uuas]"):
             G_pred = nx.Graph()
             for i in range(length):
                 for j in range(i+1, length):
@@ -85,12 +86,6 @@ class Reporter:
             uspan_total += len(gold_nonpunc_edges)
             
             gold_edge_num = len(gold_nonpunc_edges) 
-
-            for edge in correct_nonpunct_edges:
-                self.correct_deps[edge2dep[edge]] += 1
-            for edge in gold_nonpunc_edges:
-                self.total_deps[edge2dep[edge]] += 1
-                self.total_span_len[edge2dep[edge]] += abs(edge[0]-edge[1])
             
         uuas = uspan_correct / uspan_total
         
@@ -129,22 +124,6 @@ class Reporter:
                 edges.append(sent_edges)
 
         return edges, sents, uposes
-    
-    def compute_deps(self):
-        """Parses nonpunct dependency labels"""
-        deps = []
-        path = self.args["corpus"]["corpus_root"]+"/"+self.args["corpus"]["test_path"]
-        with open(path, encoding="utf-8") as data_file:
-            for tokenlist in tqdm(parse_incr(data_file), total=len(self.predictions), desc="[computing deps]"):
-                
-                d = {}
-                for t in tokenlist:
-                    if (type(t["id"]) == int) and (t["deps"][0][0] not in {'punct', 'root'}):
-                        head_id = t["head"]
-                        dep = t["deps"][0][0]
-                        d.update({ (head_id, t["id"]): dep, (t["id"], head_id) : dep })
-                deps.append(d)
-        return deps
     
     def print_tikz(self, predicted_edges, gold_edges, words):
         """Returns LaTeX visualizing gold and predicted dependencies with tikz-dependency LaTeX package"""
