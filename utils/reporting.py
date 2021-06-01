@@ -17,7 +17,7 @@ class Reporter:
     def __init__(self, args, cached_labels):
         self.args = args
         self.split_ = "test"
-        self.rank = args["probe"]["rank"]
+
         self.reporting_root = args["reporting"]["reporting_root"]
 
         if int(args["featurizer"]["layer"]) < 0:
@@ -56,13 +56,13 @@ class Reporter:
         sentlen_to_mean_spearmanr = {k: np.mean(v) for k, v in sentlen_to_spearmanrs.items()}    
         mean = np.mean([v for k, v in sentlen_to_mean_spearmanr.items() if k in range(5, 51)])
 
-        with open(self.reporting_root+"/"+f"rank{self.rank}-layer-{self.layer}-{self.split_}.spearmanr", "w") as f:
+        with open(self.reporting_root+"/"+f"layer-{self.layer}-{self.split_}.spearmanr", "w") as f:
             for length in sorted(sentlen_to_spearmanrs):
                 f.write(f"{length}\t{sentlen_to_spearmanrs[length]}\n")
-        with open(self.reporting_root+"/"+f"rank{self.rank}-layer-{self.layer}-{self.split_}.spearmanr_5-50_mean", "w") as f:
+        with open(self.reporting_root+"/"+f"layer-{self.layer}-{self.split_}.spearmanr_5-50_mean", "w") as f:
             f.write(str(mean))
 
-        print(f"{self.rank} - rank. {self.layer} - layer.\tMean Spearman correlation - {mean}")
+        print(f"{self.layer} - layer.\tMean Spearman correlation - {mean}")
     
     def report_uuas(self):
         """Computes UUAS score for a dataset"""
@@ -94,9 +94,9 @@ class Reporter:
             
         uuas = uspan_correct / uspan_total
         
-        with open(self.reporting_root+"/"+f"rank{self.rank}-layer-{self.layer}-{self.split_}.uuas", "w") as f:
+        with open(self.reporting_root+"/"+f"layer-{self.layer}-{self.split_}.uuas", "w") as f:
             f.write(str(uuas))
-        print(f"{self.rank} - rank. {self.layer} - layer.\tUUAS score - {uuas}")
+        print(f"{self.layer} - layer.\tUUAS score - {uuas}")
     
     def report_root_acc(self):
         """Computes root prediction accuracy"""
@@ -108,14 +108,13 @@ class Reporter:
                                                    if upos[i] != "PUNCT"], key=lambda tup: tup[1])
             correct_root_predictions += list(y_true).index(0) == nonpunc_depth_sorted_indices[0][0]
         root_acc = correct_root_predictions / len(self.predictions)
-        with open(self.reporting_root+"/"+f"rank{self.rank}-layer-{self.layer}-{self.split_}.root_acc", "w") as f:
+        with open(self.reporting_root+"/"+f"layer-{self.layer}-{self.split_}.root_acc", "w") as f:
             f.write(str(root_acc))
-        print(f"{self.rank} - rank. {self.layer} - layer.\tRoot accuracy score - {root_acc}")
+        print(f"{self.layer} - layer.\tRoot accuracy score - {root_acc}")
         
     def edges_sents_uposes(self):
         """Parses gold edges"""
         edges = []
-##        trees = []
         sents = []
         uposes = []
         path = self.args["corpus"]["corpus_root"]+"/"+self.args["corpus"]["test_path"]
@@ -125,12 +124,10 @@ class Reporter:
                 uposes.append(upos)
                 
                 sents.append([t["form"] for t in tokenlist if type(t["id"]) == int])
-##                G = nx.Graph()
-                # TODO: remove trees, leave only edges
+
                 sent_edges = [(t["id"], t["head"]) for t in tokenlist if (type(t["id"]) == int) and (t["head"] != 0)]
                 edges.append(sent_edges)
-##                assert nx.is_tree(G)
-##                trees.append(G)
+
         return edges, sents, uposes
     
     def compute_deps(self):
