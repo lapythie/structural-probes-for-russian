@@ -183,7 +183,7 @@ class Reporter:
         ax.set_xticklabels(words, rotation=90, ha="left")
         ax.set_yticklabels(words, rotation=0, va="top")
         plt.tight_layout()
-        plt.show();
+        plt.savefig(os.path.join(self.reporting_root, f'gold-{sent_id}.png'), dpi=300)
 
         plt.clf()
         ax = sns.heatmap(prediction)
@@ -193,4 +193,4 @@ class Reporter:
         ax.set_xticklabels(words, rotation=90, ha="left")
         ax.set_yticklabels(words, rotation=0, va="top")
         plt.tight_layout()
-        plt.show();
+        plt.savefig(os.path.join(self.reporting_root, f'pred-{sent_id}.png'), dpi=300)
