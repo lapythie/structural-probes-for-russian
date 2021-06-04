@@ -21,3 +21,9 @@ Steps:
 An hdf5 file with embedded conllu dataset will be created at `.embeddings/rubert`.
 
 5. Create config file at `config/one_of_two_task_aliases/preferably_telling_config_name.yaml` where `one_of_two_task_aliases` is either `prd` (parse-dastance probing task) or `pad` (parse-depth probing task). For some reason I used those closely following original notation.
+
+6. Run `demo.py` to train a probe, make predictions and report metrics on the test set. Example command:
+
+`py demo.py --config_path .\config\prd\str-prd-rubert-1.yaml`,
+
+where `str-prd-rubert-1.yaml` is the demo config.
