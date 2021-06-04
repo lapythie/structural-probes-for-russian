@@ -1,15 +1,8 @@
 import os
-import h5py
 import yaml
 import torch
 import numpy as np
-import torch.nn as nn
-import networkx as nx
-from tqdm.auto import tqdm
-from conllu import parse_incr
-from collections import namedtuple
 from argparse import ArgumentParser
-from transformers import BertTokenizer
 
 from utils.data import *
 from utils.loss import *
@@ -69,3 +62,7 @@ reporting_root = args["reporting"]["reporting_root"]
 os.makedirs(reporting_root, exist_ok=True)
 
 rep = Reporter(args, cached_labels=test.labels)
+
+if task == "parse-distance":
+    for sent_id in range(20):
+        rep.report_distance_image(sent_id)

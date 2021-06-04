@@ -8,6 +8,8 @@ from scipy.stats import spearmanr
 import numpy as np
 import networkx as nx
 from conllu import parse_incr
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 import yaml
 import torch
@@ -68,7 +70,7 @@ class Reporter:
         uspan_correct = 0
 
         for y_pred, length, gold_edges, upos, sent in tqdm(zip(self.predictions, self.lengths, self.edges, self.uposes,
-                                                               self.sents), len(self.predictions), desc="[computing uuas]"):
+                                                               self.sents), total=len(self.predictions), desc="[computing uuas]"):
             G_pred = nx.Graph()
             for i in range(length):
                 for j in range(i+1, length):
