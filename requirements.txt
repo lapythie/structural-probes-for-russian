@@ -3,3 +3,7 @@ pyyaml
 numpy
 h5py
 tqdm
+matplotlib
+seaborn
+conllu
+networkx
