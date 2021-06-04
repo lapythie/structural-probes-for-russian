@@ -15,6 +15,7 @@ from utils.data import *
 from utils.loss import *
 from utils.probe import *
 from utils.training import ProbeTrainer, predict
+from utils.reporting import Reporter
 
 argp = ArgumentParser()
 argp.add_argument("--config_path", default=None, type=str, help="path to yaml config file")
@@ -66,3 +67,5 @@ torch.save(predictions, args["probe"]["predictions_path"])
 
 reporting_root = args["reporting"]["reporting_root"]
 os.makedirs(reporting_root, exist_ok=True)
+
+rep = Reporter(args, cached_labels=test.labels)
