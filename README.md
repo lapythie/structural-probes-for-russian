@@ -26,4 +26,4 @@ An hdf5 file with embedded conllu dataset will be created at `.embeddings/rubert
 
 `py demo.py --config_path config/prd/str-prd-rubert-1.yaml`,
 
-where `str-prd-rubert-1.yaml` is the demo config.
+where `str-prd-rubert-1.yaml` is the demo config or your config.
