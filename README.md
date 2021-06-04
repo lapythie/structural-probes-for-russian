@@ -24,6 +24,6 @@ An hdf5 file with embedded conllu dataset will be created at `.embeddings/rubert
 
 6. Run `demo.py` to train a probe, make predictions and report metrics on the test set. Example command:
 
-`py demo.py --config_path .\config\prd\str-prd-rubert-1.yaml`,
+`py demo.py --config_path config/prd/str-prd-rubert-1.yaml`,
 
 where `str-prd-rubert-1.yaml` is the demo config.
