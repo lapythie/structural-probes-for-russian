@@ -89,8 +89,7 @@ class ProbingDataset(torch.utils.data.Dataset):
                 root = [t["id"] for t in tokenlist if t["head"] == 0]
                 assert len(root) == 1
                 roots.append(root[0])
-                if len(sents) == 100:
-                    break
+
         return trees, roots, sents, lengths
 
     def plot(self, id):
