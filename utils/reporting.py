@@ -28,9 +28,7 @@ class Reporter:
             self.layer = args["featurizer"]["layer"]
             
         self.predictions_path = args["probe"]["predictions_path"]
-##        self.labels_path = f'cached_labels/{args["probe"]["task"]}/test.labels'
         self.predictions = torch.load(self.predictions_path, map_location=torch.device('cpu'))
-##        self.labels = torch.load(self.labels_path, map_location=torch.device('cpu'))
         self.labels = cached_labels
         self.lengths = [len(label) for label in self.labels]
         self.edges, self.sents, self.uposes = self.edges_sents_uposes()
