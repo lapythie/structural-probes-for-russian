@@ -1,9 +1,10 @@
 scipy
 pyyaml
-numpy
-h5py
+numpy==1.17.3
+h5py==2.10.0
 tqdm
 matplotlib
 seaborn
-conllu
-networkx
+conllu==4.4
+networkx==2.4
+torch==1.5.1
