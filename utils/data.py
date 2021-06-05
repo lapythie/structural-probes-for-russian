@@ -198,6 +198,7 @@ class TwoWordDataset(ProbingDataset):
         return super().__getitem__(index), self.labels[index]
 
     def compute_labels(self):
+        """Computes depth labels using precomputed trees"""
         distances = []
         for tree, sent in tqdm(zip(self.trees, self.sents), desc="[computing distance labels]"):
             sent_distances = torch.zeros((len(sent), len(sent)))
